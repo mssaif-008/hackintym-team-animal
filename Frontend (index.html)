@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Knee X-ray Fracture Detection</title>
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f0f2f5;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .container {
+            width: 80%;
+            max-width: 600px;
+            background-color: #ffffff;
+            border-radius: 15px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+            padding: 30px;
+            text-align: center;
+        }
+        h1 {
+            color: #007BFF;
+            font-size: 2.5em;
+            margin-bottom: 20px;
+        }
+        p {
+            font-size: 1.2em;
+            color: #555;
+            margin-bottom: 30px;
+        }
+        input[type="file"] {
+            border: 2px solid #007BFF;
+            border-radius: 10px;
+            padding: 15px;
+            background-color: #f9f9f9;
+            width: 100%;
+            box-sizing: border-box;
+            margin-bottom: 20px;
+            font-size: 16px;
+        }
+        button {
+            padding: 15px 30px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 18px;
+            transition: background-color 0.3s ease;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        #result {
+            margin-top: 20px;
+            font-size: 1.5em;
+            font-weight: bold;
+        }
+        .error {
+            color: #dc3545;
+        }
+        .success {
+            color: #28a745;
+        }
+        .info {
+            color: #17a2b8;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Knee X-ray Fracture Detection</h1>
+        <p>Upload your knee X-ray image to determine if there are any fractures.</p>
+        <form id="uploadForm">
+            <input type="file" id="fileInput" name="file" accept="image/*" required>
+            <button type="button" onclick="uploadImage()">Upload and Predict</button>
+        </form>
+        <div id="result" class="info">Please upload an image to get a prediction.</div>
+    </div>
+
+    <script>
+        function uploadImage() {
+            const formData = new FormData();
+            const fileInput = document.getElementById('fileInput').files[0];
+            formData.append('file', fileInput);
+
+            fetch('/predict', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                const resultDiv = document.getElementById('result');
+                if (data.result === 'Fracture') {
+                    resultDiv.textContent = 'Prediction: Fracture';
+                    resultDiv.className = 'success';
+                } else if (data.result === 'Normal') {
+                    resultDiv.textContent = 'Prediction: Normal';
+                    resultDiv.className = 'success';
+                } else {
+                    resultDiv.textContent = 'Error: ' + data.error;
+                    resultDiv.className = 'error';
+                }
+            })
+            .catch(error => {
+                const resultDiv = document.getElementById('result');
+                resultDiv.textContent = 'Error: ' + error.message;
+                resultDiv.className = 'error';
+            });
+        }
+    </script>
+</body>
+</html>
