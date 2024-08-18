@@ -1,0 +1,8 @@
+from model import createModel
+import tensorflow as tf
+
+model = createModel()
+trainData = None  # Replace with actual training data
+validationData = None  # Replace with actual validation data
+model.fit(trainData, epochs=10, validation_data=validationData)
+model.save('kneeXrayModel.h5')
