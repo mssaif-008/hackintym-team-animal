@@ -1,0 +1,41 @@
+from flask import Flask, request, jsonify
+from flask_cors import CORS
+from tensorflow.keras.models import load_model
+import cv2
+import numpy as np
+import os
+
+app = Flask(__name__)
+CORS(app)
+model = load_model('kneeXrayModel.h5')
+
+def preprocessImage(imagePath):
+    img = cv2.imread(imagePath, cv2.IMREAD_GRAYSCALE)
+    img = cv2.resize(img, (224, 224))
+    img = img / 255.0
+    img = np.reshape(img, (1, 224, 224, 1))
+    return img
+
+@app.route('/')
+def index():
+    return "Knee X-ray Prediction API"
+
+@app.route('/predict', methods=['POST'])
+def predict():
+    if 'file' not in request.files:
+        return jsonify({'error': 'No file provided'})
+    
+    file = request.files['file']
+    filePath = os.path.join('uploads', file.filename)
+    file.save(filePath)
+
+    img = preprocessImage(filePath)
+    prediction = model.predict(img)
+    result = "Fracture" if prediction > 0.5 else "Normal"
+    os.remove(filePath)
+    return jsonify({'result': result})
+
+if __name__ == '__main__':
+    if not os.path.exists('uploads'):
+        os.makedirs('uploads')
+    app.run(debug=True)
